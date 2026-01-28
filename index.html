@@ -12,8 +12,9 @@
     h1 { margin: 0 0 10px; }
     .row { margin: 8px 0; }
     .label { font-weight: bold; }
-    .small { color:#555; font-size: 14px; margin-top: 14px; }
-    .btn { display:inline-block; margin-top:12px; padding:10px 14px; border-radius:10px; text-decoration:none; border:1px solid #333; }
+    .small { color:#555; font-size: 14px; margin-top: 14px; line-height: 1.35; }
+    .btn { display:inline-block; margin-top:12px; padding:10px 14px; border-radius:10px; text-decoration:none; border:1px solid #333; color:#111; }
+    .muted { color:#666; font-size: 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -21,25 +22,38 @@
   <div id="box"></div>
 
   <script>
-    // 1) Cambia esto por tu nombre/empresa
-    const EMISOR = "ASMECOL";
+    // ====== CONFIGURACIÓN ======
+    const VERSION = "v1.1-ASMECOL";  // <- si cambias esto y lo ves en la página, ya cargó lo nuevo
 
-    // 2) Aquí registro certificados (solo copias una línea por certificado)
-    //    Si tienes el PDF en Drive/Dropbox/link público, lo pones en "pdf"
+    // Emisor por defecto:
+    const EMISOR_DEFAULT = "ASMECOL";
+
+    // Certificados registrados:
     const CERTS = {
       "CERT-2026-001": { nombre: "Juan Pérez", doc: "CC *****123", fecha: "2026-01-27", estado: "VÁLIDO", pdf: "" },
       "CERT-2026-002": { nombre: "María Gómez", doc: "CC *****456", fecha: "2026-01-27", estado: "VÁLIDO", pdf: "" }
     };
 
-    // 3) Toma el ID desde el link: ?id=CERT-2026-001
+    // ====== LECTURA DE PARÁMETROS ======
     const params = new URLSearchParams(location.search);
+
+    // ID desde el link: ?id=CERT-2026-001
     const id = (params.get("id") || "").trim().toUpperCase();
+
+    // Emisor opcional desde el link: ?emisor=ASMECOL
+    // (Si no lo envías, usa EMISOR_DEFAULT)
+    const emisorParam = (params.get("emisor") || "").trim();
+    const EMISOR = emisorParam || EMISOR_DEFAULT;
 
     const box = document.getElementById("box");
 
+    // ====== RENDER ======
     if (id && CERTS[id] && CERTS[id].estado === "VÁLIDO") {
       const c = CERTS[id];
-      const pdfBtn = c.pdf ? `<a class="btn" href="${c.pdf}" target="_blank" rel="noopener">Ver PDF</a>` : "";
+      const pdfBtn = c.pdf
+        ? `<a class="btn" href="${c.pdf}" target="_blank" rel="noopener">Ver PDF</a>`
+        : "";
+
       box.innerHTML = `
         <div class="card ok">
           <h1>✅ CERTIFICADO VÁLIDO</h1>
@@ -51,6 +65,7 @@
           <div class="row"><span class="label">Estado:</span> ${c.estado}</div>
           ${pdfBtn}
           <div class="small">Si este código no aparece como válido en esta página, el certificado no es auténtico.</div>
+          <div class="muted">Sistema de verificación ${VERSION}</div>
         </div>
       `;
     } else {
@@ -59,6 +74,7 @@
           <h1>❌ CERTIFICADO NO ENCONTRADO</h1>
           <div class="row">Código consultado: <b>${id || "(sin código)"}</b></div>
           <div class="small">Verifica el QR o contacta al emisor.</div>
+          <div class="muted">Sistema de verificación ${VERSION}</div>
         </div>
       `;
     }
