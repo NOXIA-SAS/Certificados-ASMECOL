@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verificación de Certificado</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 22px; max-width: 720px; margin: auto; }
+    .card { border-radius: 14px; padding: 18px; border: 2px solid #ddd; background: #fff; }
+    .ok { border-color: #2e7d32; background: #e8f5e9; }
+    .bad { border-color: #c62828; background: #ffebee; }
+    h1 { margin: 0 0 10px; }
+    .row { margin: 8px 0; }
+    .label { font-weight: bold; }
+    .small { color:#555; font-size: 14px; margin-top: 14px; }
+    .btn { display:inline-block; margin-top:12px; padding:10px 14px; border-radius:10px; text-decoration:none; border:1px solid #333; }
+  </style>
+</head>
+<body>
+
+  <div id="box"></div>
+
+  <script>
+    // 1) Cambia esto por tu nombre/empresa
+    const EMISOR = "NOXIA S.A.S.";
+
+    // 2) Aquí registro certificados (solo copias una línea por certificado)
+    //    Si tienes el PDF en Drive/Dropbox/link público, lo pones en "pdf"
+    const CERTS = {
+      "CERT-2026-001": { nombre: "Juan Pérez", doc: "CC *****123", fecha: "2026-01-27", estado: "VÁLIDO", pdf: "" },
+      "CERT-2026-002": { nombre: "María Gómez", doc: "CC *****456", fecha: "2026-01-27", estado: "VÁLIDO", pdf: "" }
+    };
+
+    // 3) Toma el ID desde el link: ?id=CERT-2026-001
+    const params = new URLSearchParams(location.search);
+    const id = (params.get("id") || "").trim().toUpperCase();
+
+    const box = document.getElementById("box");
+
+    if (id && CERTS[id] && CERTS[id].estado === "VÁLIDO") {
+      const c = CERTS[id];
+      const pdfBtn = c.pdf ? `<a class="btn" href="${c.pdf}" target="_blank" rel="noopener">Ver PDF</a>` : "";
+      box.innerHTML = `
+        <div class="card ok">
+          <h1>✅ CERTIFICADO VÁLIDO</h1>
+          <div class="row"><span class="label">Emisor:</span> ${EMISOR}</div>
+          <div class="row"><span class="label">Código:</span> ${id}</div>
+          <div class="row"><span class="label">Titular:</span> ${c.nombre}</div>
+          <div class="row"><span class="label">Documento:</span> ${c.doc}</div>
+          <div class="row"><span class="label">Fecha de emisión:</span> ${c.fecha}</div>
+          <div class="row"><span class="label">Estado:</span> ${c.estado}</div>
+          ${pdfBtn}
+          <div class="small">Si este código no aparece como válido en esta página, el certificado no es auténtico.</div>
+        </div>
+      `;
+    } else {
+      box.innerHTML = `
+        <div class="card bad">
+          <h1>❌ CERTIFICADO NO ENCONTRADO</h1>
+          <div class="row">Código consultado: <b>${id || "(sin código)"}</b></div>
+          <div class="small">Verifica el QR o contacta al emisor.</div>
+        </div>
+      `;
+    }
+  </script>
+
+</body>
+</html>
